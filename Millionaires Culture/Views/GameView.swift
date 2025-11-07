@@ -11,6 +11,7 @@ struct GameView: View {
     @StateObject var viewModel = GameViewModel()
     @Binding var showGame: Bool
     @State private var showPrizeLadder = false
+    @EnvironmentObject private var languageManager: LanguageManager
     
     var body: some View {
         ZStack {
@@ -58,7 +59,7 @@ struct GameView: View {
                 
                 VStack(spacing: 15) {
                     HStack {
-                        Text("Escalera de Premios")
+                        Text(languageManager.text(.prizeLadderTitle))
                             .font(.headline)
                             .foregroundColor(.white)
                         Spacer()
@@ -104,7 +105,7 @@ struct GameView: View {
             controlBar
             
             // Title header
-            Text("Cultura-Millonaria")
+            Text(languageManager.text(.gameTitle))
                 .font(.system(size: 32, weight: .heavy))
                 .foregroundStyle(
                     LinearGradient(
@@ -158,6 +159,9 @@ struct GameView: View {
                         )
                 }
                 
+                LanguageToggleButton()
+                    .frame(height: 44)
+                
                 Spacer()
                 
                 winningsBadge
@@ -165,7 +169,7 @@ struct GameView: View {
                 Button(action: {
                     viewModel.giveUp()
                 }) {
-                    Text("Retirarse")
+                    Text(languageManager.text(.cashOutButton))
                         .font(.system(size: 14, weight: .bold))
                         .foregroundColor(.white)
                         .padding(.vertical, 10)
@@ -185,7 +189,7 @@ struct GameView: View {
                 .foregroundColor(Color(red: 0.1, green: 0.5, blue: 0.1))
                 .font(.system(size: 22))
             VStack(alignment: .leading, spacing: 2) {
-                Text("Ganado")
+                Text(languageManager.text(.winningsLabel))
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundColor(.white.opacity(0.8))
                 Text("$\(viewModel.formatCurrency(viewModel.accumulatedPrize))")
@@ -207,7 +211,7 @@ struct GameView: View {
         HStack(spacing: 30) {
             LifelineGameButton(
                 icon: "circle.slash",
-                label: "50:50",
+                label: languageManager.text(.lifelineFifty),
                 isAvailable: viewModel.lifelines[.fiftyFifty] ?? false
             ) {
                 viewModel.useLifeline(.fiftyFifty)
@@ -215,7 +219,7 @@ struct GameView: View {
             
             LifelineGameButton(
                 icon: "lightbulb.fill",
-                label: "Experto",
+                label: languageManager.text(.lifelineExpert),
                 isAvailable: viewModel.lifelines[.expert] ?? false
             ) {
                 viewModel.useLifeline(.expert)
@@ -223,7 +227,7 @@ struct GameView: View {
             
             LifelineGameButton(
                 icon: "person.3.fill",
-                label: "Audiencia",
+                label: languageManager.text(.lifelineAudience),
                 isAvailable: viewModel.lifelines[.audience] ?? false
             ) {
                 viewModel.useLifeline(.audience)
@@ -236,12 +240,12 @@ struct GameView: View {
     
     func questionView(question: Question) -> some View {
         VStack(spacing: 15) {
-            Text("Premio Actual: $\(viewModel.formatCurrency(viewModel.currentPrize))")
+            Text("\(languageManager.currentPrizeLabel()): $\(viewModel.formatCurrency(viewModel.currentPrize))")
                 .font(.system(size: 20, weight: .semibold))
                 .foregroundColor(Color(red: 0.95, green: 0.75, blue: 0.3))
             
             if safeLevels.contains(question.questionIndex) {
-                Text("**NIVEL SEGURO**")
+                Text("**\(languageManager.safeLevelLabel())**")
                     .font(.system(size: 16, weight: .bold))
                     .foregroundColor(.green)
                     .padding(.vertical, 5)

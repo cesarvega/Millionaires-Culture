@@ -11,9 +11,10 @@ import AVFoundation
 struct MenuView: View {
     @Binding var showGame: Bool
     private let soundPlayer = PlayButtonSoundPlayer.shared
+    @EnvironmentObject private var languageManager: LanguageManager
     
     var body: some View {
-        ZStack {
+        ZStack(alignment: .topTrailing) {
             // Background gradient
             LinearGradient(
                 gradient: Gradient(colors: [
@@ -53,12 +54,12 @@ struct MenuView: View {
                         
                         // Title
                         VStack(spacing: 5) {
-                            Text("WHO WANTS TO BE")
+                            Text(languageManager.text(.menuTitleTop))
                                 .font(.system(size: 24, weight: .bold))
                                 .foregroundColor(Color(red: 0.95, green: 0.75, blue: 0.3))
                                 .tracking(2)
                             
-                            Text("MILLIONAIRE?")
+                            Text(languageManager.text(.menuTitleBottom))
                                 .font(.system(size: 42, weight: .heavy))
                                 .foregroundColor(Color(red: 0.95, green: 0.75, blue: 0.3))
                                 .tracking(3)
@@ -77,7 +78,7 @@ struct MenuView: View {
                         soundPlayer.play()
                         showGame = true
                     }) {
-                        Text("PLAY")
+                        Text(languageManager.text(.playButton))
                             .font(.system(size: 32, weight: .bold))
                             .foregroundColor(.white)
                             .frame(width: 220, height: 70)
@@ -99,20 +100,20 @@ struct MenuView: View {
                             .shadow(color: .black.opacity(0.3), radius: 10, x: 0, y: 5)
                     }
                     
-                    // Navigation buttons
-                    HStack(spacing: 50) {
-                        NavigationButton(icon: "trophy.fill", label: "LEADERBOARD")
-                        NavigationButton(icon: "gearshape.fill", label: "SETTINGS")
-                        NavigationButton(icon: "questionmark.circle.fill", label: "HOW TO PLAY")
-                    }
-                    .padding(.horizontal)
+                    // Navigation buttons - Hidden for now
+//                    HStack(spacing: 50) {
+//                        NavigationButton(icon: "trophy.fill", label: "LEADERBOARD")
+//                        NavigationButton(icon: "gearshape.fill", label: "SETTINGS")
+//                        NavigationButton(icon: "questionmark.circle.fill", label: "HOW TO PLAY")
+//                    }
+//                    .padding(.horizontal)
                 }
                 
                 Spacer()
                 
                 // Lifelines section
                 VStack(spacing: 15) {
-                    Text("LIFELINES")
+                    Text(languageManager.text(.lifelinesTitle))
                         .font(.system(size: 20, weight: .bold))
                         .foregroundColor(Color(red: 0.95, green: 0.75, blue: 0.3))
                         .tracking(2)
@@ -130,6 +131,10 @@ struct MenuView: View {
                         .opacity(0.6)
                 )
             }
+            
+            LanguageToggleButton()
+                .padding(.top, 30)
+                .padding(.trailing, 25)
         }
     }
 }

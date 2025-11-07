@@ -41,6 +41,7 @@ class GameViewModel: ObservableObject {
     @Published var audiencePoll: [String: Int] = [:]
     
     private let soundPlayer = GameSoundPlayer.shared
+    private let languageManager = LanguageManager.shared
     
     var currentQuestion: Question? {
         guard currentQuestionIndex < gameQuestions.count else { return nil }
