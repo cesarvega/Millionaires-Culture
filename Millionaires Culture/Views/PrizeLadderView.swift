@@ -9,10 +9,11 @@ import SwiftUI
 
 struct PrizeLadderView: View {
     @ObservedObject var viewModel: GameViewModel
+    @EnvironmentObject private var languageManager: LanguageManager
     
     var body: some View {
         VStack(spacing: 0) {
-            Text("Escalera de Premios")
+            Text(languageManager.text(.prizeLadderTitle))
                 .font(.system(size: 18, weight: .bold))
                 .foregroundColor(Color(red: 0.95, green: 0.75, blue: 0.3))
                 .padding(.bottom, 15)

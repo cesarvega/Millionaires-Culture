@@ -123,13 +123,13 @@ class GameViewModel: ObservableObject {
             let toEliminate = incorrectOptions.shuffled().prefix(2)
             eliminatedOptions.formUnion(toEliminate)
             
-            modalTitle = "Comodín 50:50"
-            modalMessage = "Dos opciones incorrectas han sido eliminadas. ¡Elige sabiamente!"
+            modalTitle = languageManager.lifelineTitle(for: .fiftyFifty)
+            modalMessage = languageManager.lifelineMessage(for: .fiftyFifty)
             showModal = true
             
         case .expert:
-            modalTitle = "Consejo del Experto"
-            modalMessage = "El experto te sugiere: \"\(question.hint)\""
+            modalTitle = languageManager.lifelineTitle(for: .expert)
+            modalMessage = languageManager.lifelineMessage(for: .expert, hint: question.hint)
             showModal = true
             
         case .audience:
@@ -151,7 +151,7 @@ class GameViewModel: ObservableObject {
             }
             
             audiencePoll = poll
-            modalTitle = "Votación de la Audiencia Global"
+            modalTitle = languageManager.lifelineTitle(for: .audience)
             modalMessage = "audience_poll"
             showModal = true
         }
@@ -173,8 +173,8 @@ class GameViewModel: ObservableObject {
                     if self.currentQuestionIndex == self.gameQuestions.count - 1 {
                         // Won the game
                         self.gameState = .won
-                        self.modalTitle = "¡Felicidades, Millonario de Cultura General!"
-                        self.modalMessage = "¡Has ganado $\(self.formatCurrency(1000000))! Has superado todas las preguntas."
+                        self.modalTitle = self.languageManager.winTitle()
+                        self.modalMessage = self.languageManager.winMessage(amount: self.formatCurrency(1000000))
                         self.showModal = true
                     } else {
                         // Move to next question
@@ -184,8 +184,11 @@ class GameViewModel: ObservableObject {
                     // Game over
                     self.soundPlayer.playIncorrect()
                     self.gameState = .gameOver
-                    self.modalTitle = "¡GAME OVER! ¡Inténtalo de Nuevo!"
-                    self.modalMessage = "La respuesta correcta era: \(question.correctAnswer).\n\nTe llevas $\(self.formatCurrency(self.safePrizeWon))."
+                    self.modalTitle = self.languageManager.gameOverTitle()
+                    self.modalMessage = self.languageManager.gameOverMessage(
+                        correctAnswer: question.correctAnswer,
+                        safePrize: self.formatCurrency(self.safePrizeWon)
+                    )
                     self.showModal = true
                 }
             }
@@ -203,11 +206,11 @@ class GameViewModel: ObservableObject {
     
     func giveUp() {
         gameState = .gameOver
-        modalTitle = "¡Retirada Exitosa!"
+        modalTitle = languageManager.withdrawTitle()
         let winnings = accumulatedPrize
         modalMessage = winnings > 0
-            ? "¡Has decidido retirarte con una ganancia de $\(formatCurrency(winnings))! ¡Bien jugado!"
-            : "¡Has decidido retirarte con una ganancia de $0! ¡Bien jugado!"
+            ? languageManager.withdrawMessage(amount: formatCurrency(winnings))
+            : languageManager.withdrawZeroMessage()
         showModal = true
     }
     

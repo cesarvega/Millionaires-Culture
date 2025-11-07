@@ -197,4 +197,8 @@ final class LanguageManager: ObservableObject {
             return "audience_poll"
         }
     }
+    
+    func eliminatedTag() -> String {
+        currentLanguage == .spanish ? "[Eliminada]" : "[Removed]"
+    }
 }

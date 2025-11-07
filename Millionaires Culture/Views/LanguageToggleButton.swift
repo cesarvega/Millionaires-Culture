@@ -27,6 +27,6 @@ struct LanguageToggleButton: View {
             .cornerRadius(14)
             .shadow(radius: 3, y: 2)
         }
-        .accessibilityLabel("Change Language")
+        .accessibilityLabel(languageManager.currentLanguage == .spanish ? "Cambiar idioma" : "Change language")
     }
 }

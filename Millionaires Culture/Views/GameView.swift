@@ -92,7 +92,7 @@ struct GameView: View {
                 }) {
                     HStack {
                         Image(systemName: "chevron.left")
-                        Text("Menu")
+                        Text(languageManager.currentLanguage == .spanish ? "Menú" : "Menu")
                     }
                     .foregroundColor(Color(red: 0.95, green: 0.75, blue: 0.3))
                 }
@@ -287,6 +287,7 @@ struct GameView: View {
                 AnswerButton(
                     label: labels[index],
                     text: option,
+                    eliminatedLabel: languageManager.eliminatedTag(),
                     isEliminated: isEliminated,
                     isSelected: isSelected,
                     isCorrect: isCorrect,
@@ -336,7 +337,7 @@ struct GameView: View {
                 Button(action: {
                     viewModel.closeModal()
                 }) {
-                    Text(viewModel.gameState == .gameOver || viewModel.gameState == .won ? "Jugar de Nuevo" : "Continuar")
+                    Text(viewModel.gameState == .gameOver || viewModel.gameState == .won ? languageManager.text(.modalPlayAgain) : languageManager.text(.modalContinue))
                         .font(.system(size: 18, weight: .bold))
                         .foregroundColor(Color(red: 0.05, green: 0.1, blue: 0.2))
                         .padding(.vertical, 12)
@@ -356,7 +357,7 @@ struct GameView: View {
     
     var audiencePollView: some View {
         VStack(spacing: 15) {
-            Text("La audiencia ha votado así:")
+            Text(languageManager.text(.audienceIntro))
                 .font(.system(size: 18))
                 .foregroundColor(.white)
             
@@ -427,6 +428,7 @@ struct LifelineGameButton: View {
 struct AnswerButton: View {
     let label: String
     let text: String
+    let eliminatedLabel: String
     let isEliminated: Bool
     let isSelected: Bool
     let isCorrect: Bool
@@ -471,7 +473,7 @@ struct AnswerButton: View {
                     .foregroundColor(isEliminated ? .gray : Color(red: 0.95, green: 0.75, blue: 0.3))
                 
                 if isEliminated {
-                    Text("[Eliminada]")
+                    Text(eliminatedLabel)
                         .font(.system(size: 14))
                         .foregroundColor(.gray)
                         .strikethrough()
