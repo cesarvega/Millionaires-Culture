@@ -35,8 +35,8 @@ class GameViewModel: ObservableObject {
     @Published var showModal = false
     @Published var modalTitle = ""
     @Published var modalMessage = ""
-    @Published var eliminatedOptions: Set<String> = []
-    @Published var selectedAnswer: String?
+    @Published var eliminatedOptions: Set<UUID> = []
+    @Published var selectedOptionID: UUID?
     @Published var showCorrectAnswer = false
     @Published var audiencePoll: [String: Int] = [:]
     
@@ -83,7 +83,7 @@ class GameViewModel: ObservableObject {
         currentQuestionIndex = 0
         gameState = .playing
         eliminatedOptions.removeAll()
-        selectedAnswer = nil
+        selectedOptionID = nil
         showCorrectAnswer = false
         audiencePoll.removeAll()
         
@@ -99,14 +99,7 @@ class GameViewModel: ObservableObject {
         let selectedQuestions = shuffledPool.prefix(15)
         
         gameQuestions = selectedQuestions.enumerated().map { index, content in
-            Question(
-                questionText: content.question,
-                options: content.options,
-                correctAnswer: content.answer,
-                hint: content.hint,
-                prize: fixedPrizes[index],
-                questionIndex: index
-            )
+            content.makeQuestion(prize: fixedPrizes[index], index: index)
         }
     }
     
@@ -119,9 +112,9 @@ class GameViewModel: ObservableObject {
         switch type {
         case .fiftyFifty:
             // Remove 2 incorrect answers
-            let incorrectOptions = question.options.filter { $0 != question.correctAnswer }
+            let incorrectOptions = question.options.filter { $0.id != question.correctOptionID }
             let toEliminate = incorrectOptions.shuffled().prefix(2)
-            eliminatedOptions.formUnion(toEliminate)
+            eliminatedOptions.formUnion(toEliminate.map { $0.id })
             
             modalTitle = languageManager.lifelineTitle(for: .fiftyFifty)
             modalMessage = languageManager.lifelineMessage(for: .fiftyFifty)
@@ -129,7 +122,10 @@ class GameViewModel: ObservableObject {
             
         case .expert:
             modalTitle = languageManager.lifelineTitle(for: .expert)
-            modalMessage = languageManager.lifelineMessage(for: .expert, hint: question.hint)
+            modalMessage = languageManager.lifelineMessage(
+                for: .expert,
+                hint: question.hint(for: languageManager.currentLanguage)
+            )
             showModal = true
             
         case .audience:
@@ -141,7 +137,7 @@ class GameViewModel: ObservableObject {
             let labels = ["A", "B", "C", "D"]
             
             for (index, option) in question.options.enumerated() {
-                if option == question.correctAnswer {
+                if option.id == question.correctOptionID {
                     poll[labels[index]] = correctPercentage
                 } else {
                     let share = index == question.options.count - 1 ? remaining : Int.random(in: 0...remaining)
@@ -157,13 +153,15 @@ class GameViewModel: ObservableObject {
         }
     }
     
-    func checkAnswer(_ answer: String) {
+    func checkAnswer(optionID: UUID) {
         guard let question = currentQuestion else { return }
         
-        selectedAnswer = answer
+        selectedOptionID = optionID
         gameState = .answering
         
-        let isCorrect = answer == question.correctAnswer
+        let isCorrect = optionID == question.correctOptionID
+        let language = languageManager.currentLanguage
+        let correctAnswerText = question.correctAnswer(for: language)
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             self.showCorrectAnswer = true
@@ -186,7 +184,7 @@ class GameViewModel: ObservableObject {
                     self.gameState = .gameOver
                     self.modalTitle = self.languageManager.gameOverTitle()
                     self.modalMessage = self.languageManager.gameOverMessage(
-                        correctAnswer: question.correctAnswer,
+                        correctAnswer: correctAnswerText,
                         safePrize: self.formatCurrency(self.safePrizeWon)
                     )
                     self.showModal = true
@@ -198,7 +196,7 @@ class GameViewModel: ObservableObject {
     func nextQuestion() {
         currentQuestionIndex += 1
         eliminatedOptions.removeAll()
-        selectedAnswer = nil
+        selectedOptionID = nil
         showCorrectAnswer = false
         audiencePoll.removeAll()
         gameState = .playing

@@ -254,7 +254,7 @@ struct GameView: View {
                     .cornerRadius(8)
             }
             
-            Text(question.questionText)
+            Text(question.questionText(for: languageManager.currentLanguage))
                 .font(.system(size: 24, weight: .bold))
                 .foregroundColor(.white)
                 .multilineTextAlignment(.center)
@@ -271,22 +271,25 @@ struct GameView: View {
     }
     
     func optionsView(question: Question) -> some View {
-        let shuffledOptions = question.shuffledOptions
         let labels = ["A", "B", "C", "D"]
+        let language = languageManager.currentLanguage
         
         return LazyVGrid(columns: [
             GridItem(.flexible(), spacing: 15),
             GridItem(.flexible(), spacing: 15)
         ], spacing: 15) {
-            ForEach(Array(shuffledOptions.enumerated()), id: \.offset) { index, option in
-                let isEliminated = viewModel.eliminatedOptions.contains(option)
-                let isSelected = viewModel.selectedAnswer == option
-                let isCorrect = option == question.correctAnswer
+            ForEach(question.options.indices, id: \.self) { index in
+                let option = question.options[index]
+                let optionID = option.id
+                let optionText = option.text(for: language)
+                let isEliminated = viewModel.eliminatedOptions.contains(optionID)
+                let isSelected = viewModel.selectedOptionID == optionID
+                let isCorrect = optionID == question.correctOptionID
                 let showResult = viewModel.showCorrectAnswer
                 
                 AnswerButton(
                     label: labels[index],
-                    text: option,
+                    text: optionText,
                     eliminatedLabel: languageManager.eliminatedTag(),
                     isEliminated: isEliminated,
                     isSelected: isSelected,
@@ -294,7 +297,7 @@ struct GameView: View {
                     showResult: showResult
                 ) {
                     if viewModel.gameState == .playing && !isEliminated {
-                        viewModel.checkAnswer(option)
+                        viewModel.checkAnswer(optionID: optionID)
                     }
                 }
             }
